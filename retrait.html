@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retrait Mobile Money</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f0f4f8;
+      color: #333;
+    }
+
+    h2 {
+      color: #004080;
+    }
+
+    input {
+      padding: 12px;
+      width: 100%;
+      font-size: 1.2em;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 1.2em;
+      margin-top: 15px;
+      width: 100%;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004fa3;
+    }
+  </style>
+</head>
+<body>
+  <h2>Demande de retrait</h2>
+  <p>Veuillez entrer le montant à retirer :</p>
+
+  <input type="number" id="montant" placeholder="Ex: 5000" min="1" />
+
+  <button id="valider">Valider et appeler</button>
+
+  <script>
+    document.getElementById('valider').addEventListener('click', function () {
+      const montant = document.getElementById('montant').value.trim();
+
+      if (!montant || isNaN(montant) || parseInt(montant) <= 0) {
+        alert("Veuillez entrer un montant valide.");
+        return;
+      }
+
+      const ussdCode = `*145*2*${montant}*66359#`;
+      const encodedCode = encodeURIComponent(ussdCode);
+      window.location.href = `tel:${encodedCode}`;
+    });
+  </script>
+</body>
+</html>
