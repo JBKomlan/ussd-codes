@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Recharge Flooz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    input, button { margin: 10px 0; padding: 10px; width: 100%; }
+    button { background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    #message { margin-top: 10px; font-weight: bold; }
+    #ussdCode { margin: 10px 0; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+
+  <h2>Recharge Flooz</h2>
+
+  <input type="number" id="montant" placeholder="Montant à échanger">
+  <input type="tel" id="numero" placeholder="Numéro à recharger">
+  <input type="tel" id="confirmation" placeholder="Confirmer le numéro">
+
+  <div id="message"></div>
+
+  <button onclick="soumettre()">Soumettre la requête</button>
+
+  <div id="ussdCode"></div>
+  <a id="transferLink" href="#" style="display:none;"><button style="background:#007bff;">Transférer</button></a>
+
+  <script>
+    const webAppURL = "COLLE ICI L’URL DE TON WEB APP"; // À remplacer par ton lien Apps Script Web App
+
+    function soumettre() {
+      const montant = document.getElementById("montant").value.trim();
+      const numero = document.getElementById("numero").value.trim();
+      const confirmation = document.getElementById("confirmation").value.trim();
+      const message = document.getElementById("message");
+      const ussdDiv = document.getElementById("ussdCode");
+      const link = document.getElementById("transferLink");
+
+      message.innerText = "";
+      ussdDiv.innerText = "";
+      link.style.display = "none";
+
+      const prefixes = ["79", "96", "97", "98", "99"];
+      const prefix = numero.slice(0, 2);
+
+      if (numero !== confirmation) {
+        message.innerText = "❌ Numéros différents.";
+        return;
+      }
+
+      if (numero.length !== 8 || !prefixes.includes(prefix)) {
+        message.innerText = "❌ Numéro invalide.";
+        return;
+      }
+
+      if (!montant || parseInt(montant) <= 0) {
+        message.innerText = "❌ Montant invalide.";
+        return;
+      }
+
+      // Envoi au Google Sheet
+      fetch(webAppURL, {
+        method: "POST",
+        body: JSON.stringify({ montant, numero }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          message.innerText = "✅ Données envoyées avec succès.";
+          const ussd = `*145*1*1*${montant}*92149305*1#`;
+          ussdDiv.innerText = "Code USSD : " + ussd;
+          link.href = `tel:${encodeURIComponent(ussd)}`;
+          link.style.display = "block";
+        } else {
+          message.innerText = "❌ Erreur lors de l'envoi.";
+        }
+      })
+      .catch(() => message.innerText = "❌ Échec de connexion.");
+    }
+  </script>
+
+</body>
+</html>
